@@ -1,0 +1,42 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}Зомби Ферма{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+</head>
+<body>
+    <header class="header">
+        <div class="wrap header-row">
+            <a href="{% url 'index' %}" class="logo">Зомби Ферма</a>
+
+            <form action="{% url 'index' %}" method="get" class="search">
+                <input type="text" name="q" value="{{ request.GET.q }}" placeholder="Поиск..." class="input">
+                <button type="submit" class="btn">Найти</button>
+            </form>
+
+            <nav class="nav">
+                {% if user.is_authenticated %}
+                    <a href="{% url 'subs' %}" class="btn">Подписки</a>
+                    <a href="{% url 'upload' %}" class="btn btn-green">+ Загрузить</a>
+                    <a href="{% url 'channel' user.username %}">
+                        <img src="{{ user.avatar_url }}" class="ava" style="height: 37px; width: 37px">
+                    </a>
+                    <form action="{% url 'logout' %}" method="post" style="display:inline;">
+                        {% csrf_token %}
+                        <button type="submit" class="btn">Выйти</button>
+                    </form>
+                {% else %}
+                    <a href="{% url 'login' %}" class="btn">Войти</a>
+                    <a href="{% url 'register' %}" class="btn btn-green">Регистрация</a>
+                {% endif %}
+            </nav>
+        </div>
+    </header>
+
+    <main class="wrap">
+        {% block content %}{% endblock %}
+    </main>
+</body>
+</html>

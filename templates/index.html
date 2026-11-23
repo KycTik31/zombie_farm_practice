@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <h2 style="margin-bottom: 16px;">
+        {% if request.GET.q %}Поиск: {{ request.GET.q }}{% else %}Все видео{% endif %}
+    </h2>
+
+    <div class="grid">
+        {% for video in videos %}
+            <a href="{% url 'watch' video.pk %}" class="card">
+                {% if video.thumbnail %}
+                    <img src="{{ video.thumbnail.url }}" alt="{{ video.title }}" class="thumb">
+                {% else %}
+                    <div class="thumb no-thumb">Нет превью</div>
+                {% endif %}
+                <div class="card-info">
+                    <div class="card-title">{{ video.title }}</div>
+                    <div class="meta">{{ video.author.username }} · {{ video.views.count }} просм.</div>
+                </div>
+            </a>
+        {% empty %}
+            <p class="meta">Видео пока нет.</p>
+        {% endfor %}
+    </div>
+{% endblock %}

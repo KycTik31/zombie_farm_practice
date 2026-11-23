@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+{% block title %}{{ channel.first_name }} - Зомби Ферма{% endblock %}
+
+{% block content %}
+<div class="channel-top">
+    <div style="display: flex; align-items: center; gap: 16px;">
+        <div class="ava ava-big">
+            {% if channel.avatar %}<img src="{{ channel.avatar_url }}">{% else %}{{ channel.username|slice:":1"|upper }}{% endif %}
+        </div>
+        <div>
+            <h1>{{ channel.first_name }}</h1>
+            <p class="meta">Подписчиков: {{ channel.subscribers.count }} · Видео: {{ videos.count }}</p>
+        </div>
+    </div>
+
+    {% if user != channel %}
+        <form action="{% url 'subscribe' channel.pk %}" method="post">
+            {% csrf_token %}
+            <button type="submit" class="btn {% if not is_sub %}btn-green{% endif %}">
+                {% if is_sub %}Вы подписаны{% else %}Подписаться{% endif %}
+            </button>
+        </form>
+    {% else %}
+        <div style="display: flex; gap: 8px;">
+            <a href="{% url 'edit_profile' %}" class="btn">Редактировать</a>
+            <a href="{% url 'upload' %}" class="btn btn-green">+ Загрузить</a>
+        </div>
+    {% endif %}
+</div>
+
+<div class="grid">
+    {% for video in videos %}
+        <a href="{% url 'watch' video.pk %}" class="card">
+            {% if video.thumbnail %}
+                <img src="{{ video.thumbnail.url }}" class="thumb">
+            {% else %}
+                <div class="thumb no-thumb">Нет превью</div>
+            {% endif %}
+            <div class="card-info">
+                <div class="card-title">{{ video.title }}</div>
+                <div class="meta">{{ video.views.count }} просм. · {{ video.created_at|date:"d.m.Y" }}</div>
+            </div>
+        </a>
+    {% empty %}
+        <p class="meta">Видео пока нет.</p>
+    {% endfor %}
+</div>
+{% endblock %}

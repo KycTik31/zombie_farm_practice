@@ -1,0 +1,156 @@
+{% extends 'base.html' %}
+{% block title %}{{ video.title }} - Зомби Ферма{% endblock %}
+
+{% block content %}
+<div class="watch">
+    <div>
+        <div class="player-box" id="playerBox">
+            <video id="video" src="{% url 'stream' video.pk %}" preload="metadata"
+                   {% if video.thumbnail %}poster="{{ video.thumbnail.url }}"{% endif %}></video>
+            <div class="controls">
+                <button type="button" id="playBtn">▶</button>
+                <input type="range" id="seek" class="seek" min="0" value="0" step="0.1">
+                <span class="time" id="time">0:00 / 0:00</span>
+                <button type="button" id="muteBtn">🔊</button>
+                <input type="range" id="vol" class="vol" min="0" max="1" step="0.05" value="1">
+                <button type="button" id="fullBtn">⛶</button>
+            </div>
+        </div>
+
+        <h1 style="margin-top: 14px; font-size: 22px;">{{ video.title }}</h1>
+
+        <div class="actions">
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <a href="{% url 'channel' video.author.username %}" class="ava">
+                    {% if video.author.avatar %}<img src="{{ video.author.avatar_url }}">{% else %}{{ video.author.username|slice:":1"|upper }}{% endif %}
+                </a>
+                <div>
+                    <a href="{% url 'channel' video.author.username %}" style="font-weight: bold; display: block;">
+                        {{ video.author.username }}
+                    </a>
+                    <span class="meta">{{ video.views.count }} просм. · {{ video.created_at|date:"d.m.Y" }}</span>
+                </div>
+            </div>
+
+            <div style="display: flex; gap: 8px;">
+                <form action="{% url 'like' video.pk %}" method="post">
+                    {% csrf_token %}
+                    <button type="submit" class="btn {% if is_liked %}btn-green{% endif %}">
+                        ♥ {{ video.likes.count }}
+                    </button>
+                </form>
+
+                {% if user != video.author %}
+                    <form action="{% url 'subscribe' video.author.pk %}" method="post">
+                        {% csrf_token %}
+                        <button type="submit" class="btn {% if not is_sub %}btn-green{% endif %}">
+                            {% if is_sub %}Вы подписаны{% else %}Подписаться{% endif %}
+                        </button>
+                    </form>
+                {% else %}
+                    <form action="{% url 'delete_video' video.pk %}" method="post">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-red">Удалить</button>
+                    </form>
+                {% endif %}
+            </div>
+        </div>
+
+        {% if video.description %}
+            <div class="desc">{{ video.description }}</div>
+        {% endif %}
+
+        <h3>Комментарии ({{ comments.count }})</h3>
+        {% if user.is_authenticated %}
+            <form action="{% url 'comment' video.pk %}" method="post" class="comment-form" style="margin: 10px 0 18px;">
+                {% csrf_token %}
+                <textarea name="text" rows="2" placeholder="Оставить комментарий..." required></textarea>
+                <button type="submit" class="btn btn-green" style="margin-top: 8px;">Отправить</button>
+            </form>
+        {% endif %}
+
+        {% for c in comments %}
+            <div class="comment">
+                <div class="meta" style="margin-bottom: 4px;">
+                    <b>{{ c.author.username }}</b> · {{ c.created_at|date:"d.m.Y H:i" }}
+                </div>
+                <div>{{ c.text }}</div>
+            </div>
+        {% empty %}
+            <p class="meta" style="margin-top: 8px;">Комментариев пока нет.</p>
+        {% endfor %}
+    </div>
+
+    <aside>
+        <h3 style="margin-bottom: 12px;">Другие видео</h3>
+        {% for v in other_videos %}
+            <a href="{% url 'watch' v.pk %}" class="card side-card">
+                {% if v.thumbnail %}
+                    <img src="{{ v.thumbnail.url }}" class="thumb">
+                {% else %}
+                    <div class="thumb no-thumb">Видео</div>
+                {% endif %}
+                <div>
+                    <div class="card-title" style="font-size: 14px;">{{ v.title }}</div>
+                    <div class="meta">{{ v.author.username }}</div>
+                    <div class="meta">{{ v.views.count }} просм.</div>
+                </div>
+            </a>
+        {% endfor %}
+    </aside>
+</div>
+
+<script>
+    const box = document.getElementById('playerBox');
+    const video = document.getElementById('video');
+    const playBtn = document.getElementById('playBtn');
+    const seek = document.getElementById('seek');
+    const timeEl = document.getElementById('time');
+    const muteBtn = document.getElementById('muteBtn');
+    const vol = document.getElementById('vol');
+    const fullBtn = document.getElementById('fullBtn');
+
+    function fmt(sec) {
+        if (!sec || isNaN(sec)) return '0:00';
+        const m = Math.floor(sec / 60);
+        const s = Math.floor(sec % 60);
+        return m + ':' + (s < 10 ? '0' : '') + s;
+    }
+
+    function togglePlay() {
+        video.paused ? video.play() : video.pause();
+    }
+
+    playBtn.onclick = togglePlay;
+    video.onclick = togglePlay;
+    video.onplay = () => playBtn.textContent = '❚❚';
+    video.onpause = () => playBtn.textContent = '▶';
+
+    video.onloadedmetadata = () => {
+        seek.max = video.duration || 0;
+        timeEl.textContent = '0:00 / ' + fmt(video.duration);
+    };
+
+    video.ontimeupdate = () => {
+        seek.value = video.currentTime;
+        timeEl.textContent = fmt(video.currentTime) + ' / ' + fmt(video.duration);
+    };
+
+    seek.oninput = () => video.currentTime = seek.value;
+
+    muteBtn.onclick = () => {
+        video.muted = !video.muted;
+        muteBtn.textContent = video.muted ? '🔇' : '🔊';
+    };
+
+    vol.oninput = () => {
+        video.volume = vol.value;
+        video.muted = vol.value === 0;
+        muteBtn.textContent = video.muted ? '🔇' : '🔊';
+    };
+
+    fullBtn.onclick = () => {
+        document.fullscreenElement ? document.exitFullscreen() : box.requestFullscreen();
+    };
+</script>
+{% endblock %}

@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+{% block title %}Подписки - Зомби Ферма{% endblock %}
+
+{% block content %}
+    <h2 style="margin-bottom: 14px;">Подписки</h2>
+
+    <div class="subs-bar">
+        {% for ch in channels %}
+            <a href="{% url 'channel' ch.username %}" class="sub-item">
+                <div class="ava">
+                    {% if ch.avatar %}<img src="{{ ch.avatar_url }}">{% else %}{{ ch.username|slice:":1"|upper }}{% endif %}
+                </div>
+                <span>{{ ch.username }}</span>
+            </a>
+        {% empty %}
+            <p class="meta">Пока нет подписок.</p>
+        {% endfor %}
+    </div>
+
+    <div class="grid">
+        {% for video in videos %}
+            <a href="{% url 'watch' video.pk %}" class="card">
+                {% if video.thumbnail %}
+                    <img src="{{ video.thumbnail.url }}" class="thumb">
+                {% else %}
+                    <div class="thumb no-thumb">Нет превью</div>
+                {% endif %}
+                <div class="card-info">
+                    <div class="card-title">{{ video.title }}</div>
+                    <div class="meta">{{ video.author.username }} · {{ video.views.count }} просм.</div>
+                </div>
+            </a>
+        {% empty %}
+            <p class="meta">Новых видео нет.</p>
+        {% endfor %}
+    </div>
+{% endblock %}

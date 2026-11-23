@@ -1,0 +1,401 @@
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    background: #111312;
+    color: #eee;
+    line-height: 1.4;
+}
+
+a {
+    color: inherit;
+    text-decoration: none;
+}
+
+img {
+    max-width: 100%;
+    display: block;
+}
+
+.wrap {
+    width: 1200px;
+    margin: 0 auto;
+    padding: 0 15px;
+}
+
+.header {
+    background: #1a1d1b;
+    border-bottom: 1px solid #2b312d;
+    padding: 12px 0;
+    margin-bottom: 24px;
+}
+
+.header-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 15px;
+}
+
+.logo {
+    font-size: 20px;
+    font-weight: bold;
+    color: #4ade80;
+}
+
+.search {
+    display: flex;
+    gap: 8px;
+    width: 420px;
+}
+
+.nav {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.btn {
+    display: inline-block;
+    padding: 8px 14px;
+    border-radius: 6px;
+    border: 1px solid #303833;
+    background: #232825;
+    color: #eee;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+.btn:hover {
+    border-color: #4ade80;
+}
+
+.btn-green {
+    background: #4ade80;
+    color: #092212;
+    border-color: #4ade80;
+    font-weight: bold;
+}
+
+.btn-red {
+    background: #dc2626;
+    border-color: #dc2626;
+    color: #fff;
+}
+
+.input,
+.form-row input,
+.form-row select,
+.form-row textarea,
+.comment-form textarea {
+    width: 100%;
+    padding: 8px 10px;
+    border-radius: 6px;
+    border: 1px solid #303833;
+    background: #111312;
+    color: #eee;
+    font-size: 14px;
+    font-family: inherit;
+}
+
+.box {
+    width: 480px;
+    margin: 30px auto;
+    background: #1a1d1b;
+    border: 1px solid #2b312d;
+    border-radius: 8px;
+    padding: 20px;
+}
+
+.form-row {
+    margin-bottom: 14px;
+}
+
+.form-row label {
+    display: block;
+    margin-bottom: 5px;
+    color: #9aa59e;
+    font-size: 14px;
+}
+
+.err {
+    color: #ef4444;
+    font-size: 13px;
+    margin-top: 4px;
+    display: block;
+}
+
+.subs-bar {
+    display: flex;
+    gap: 16px;
+    padding-bottom: 16px;
+    margin-bottom: 20px;
+    border-bottom: 1px solid #2b312d;
+}
+
+.sub-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    color: #9aa59e;
+}
+
+.ava {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: #232825;
+    border: 2px solid #4ade80;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    color: #4ade80;
+    overflow: hidden;
+}
+
+.ava img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.ava-big {
+    width: 72px;
+    height: 72px;
+    font-size: 24px;
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+    margin-bottom: 40px;
+}
+
+.upload-box {
+    width: 900px;
+    margin: 24px auto;
+    background: #1a1d1b;
+    border: 1px solid #2b312d;
+    border-radius: 10px;
+    padding: 24px;
+}
+
+.upload-grid {
+    display: grid;
+    grid-template-columns: 360px 1fr;
+    gap: 24px;
+    margin-top: 16px;
+}
+
+.dropzone {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    height: 150px;
+    padding: 16px;
+    border: 2px dashed #303833;
+    border-radius: 8px;
+    background: #111312;
+    cursor: pointer;
+    text-align: center;
+}
+
+.dropzone:hover,
+.dropzone.active {
+    border-color: #4ade80;
+    background: #151c17;
+}
+
+.thumb-picker {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 202px;
+    margin-top: 14px;
+    border: 2px dashed #303833;
+    border-radius: 8px;
+    background: #111312;
+    cursor: pointer;
+    overflow: hidden;
+    color: #9aa59e;
+    font-size: 14px;
+}
+
+.thumb-picker:hover {
+    border-color: #4ade80;
+}
+
+.thumb-picker img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.card {
+    background: #1a1d1b;
+    border: 1px solid #2b312d;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.card:hover {
+    border-color: #4ade80;
+}
+
+.thumb {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+    background: #232825;
+}
+
+.no-thumb {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #777;
+}
+
+.card-info {
+    padding: 12px;
+}
+
+.card-title {
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+.meta {
+    font-size: 13px;
+    color: #9aa59e;
+}
+
+.watch {
+    display: grid;
+    grid-template-columns: 780px 1fr;
+    gap: 24px;
+    margin-bottom: 40px;
+}
+
+.player-box {
+    background: #000;
+    border: 1px solid #2b312d;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.player-box video {
+    width: 100%;
+    height: 440px;
+    background: #000;
+    display: block;
+    cursor: pointer;
+}
+
+.player-box:fullscreen video {
+    height: calc(100vh - 46px);
+    object-fit: contain;
+}
+
+.controls {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 12px;
+    background: #1a1d1b;
+    border-top: 1px solid #2b312d;
+}
+
+.controls button {
+    background: none;
+    border: none;
+    color: #eee;
+    font-size: 15px;
+    cursor: pointer;
+    padding: 2px 6px;
+}
+
+.controls button:hover {
+    color: #4ade80;
+}
+
+.seek {
+    flex: 1;
+    accent-color: #4ade80;
+    cursor: pointer;
+}
+
+.vol {
+    width: 75px;
+    accent-color: #4ade80;
+    cursor: pointer;
+}
+
+.time {
+    font-size: 13px;
+    color: #9aa59e;
+    min-width: 85px;
+    text-align: center;
+}
+
+.actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px 0;
+    border-bottom: 1px solid #2b312d;
+    margin-bottom: 14px;
+}
+
+.desc {
+    background: #1a1d1b;
+    border: 1px solid #2b312d;
+    border-radius: 8px;
+    padding: 12px;
+    margin-bottom: 20px;
+    white-space: pre-line;
+}
+
+.comment {
+    background: #1a1d1b;
+    border: 1px solid #2b312d;
+    border-radius: 6px;
+    padding: 10px 12px;
+    margin-top: 10px;
+}
+
+.side-card {
+    display: flex;
+    gap: 10px;
+    padding: 8px;
+    margin-bottom: 10px;
+}
+
+.side-card .thumb {
+    width: 130px;
+    height: 75px;
+    flex-shrink: 0;
+    border-radius: 4px;
+}
+
+.channel-top {
+    background: #1a1d1b;
+    border: 1px solid #2b312d;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
