@@ -1,14 +1,12 @@
 import mimetypes
 import os
 import re
-from types import SimpleNamespace
 
-from django.contrib.auth.decorators import login_required
-from django.http import HttpResponse, FileResponse, StreamingHttpResponse
-from django.shortcuts import render, get_object_or_404, redirect
-from django.templatetags.static import static
 from django.contrib.auth import get_user_model
-from django.utils import timezone
+from django.contrib.auth.decorators import login_required
+from django.http import HttpResponse, StreamingHttpResponse, JsonResponse
+from django.shortcuts import render, get_object_or_404, redirect
+from django.views.decorators.http import require_POST
 
 from .forms import UploadVideoForm
 from .models import *
@@ -115,12 +113,36 @@ def stream(request, pk):
     return resp
 
 
+@login_required()
+@require_POST
 def like(request, pk):
+    video = get_object_or_404(Video, pk=pk)
+    obj, created = Like.objects.get_or_create(user=request.user, video=video)
+    if not created:
+        obj.delete()
     return redirect('watch', pk=pk)
 
 
+@login_required()
+@require_POST
 def comment(request, pk):
+    video = get_object_or_404(Video, pk=pk)
+    text = request.POST.get('text', '').strip()
+    if not text:
+        return JsonResponse({'error': 'Пустой комментарий'}, status=400)
+    Comment.objects.create(author=request.user, video=video, text=text)
     return redirect('watch', pk=pk)
+
+
+@login_required()
+@require_POST
+def subscribe(request, pk):
+    channel_user = get_object_or_404(User, pk=pk)
+    if channel_user != request.user:
+        obj, created = Subscription.objects.get_or_create(subscriber=request.user, channel=channel_user)
+        if not created:
+            obj.delete()
+    return redirect('channel', username=channel_user.username)
 
 
 def delete_video(request, pk):
@@ -128,18 +150,9 @@ def delete_video(request, pk):
 
 
 def channel(request, username):
-    fake_channel = SimpleNamespace(
-        pk=1,
-        username=username,
-        avatar_url=static('img/default_avatar.png'),
-        subscribers={'count': 10},
-    )
+    user = get_object_or_404(User, username=username)
     return render(request, 'channel.html', {
-        'channel': fake_channel,
-        'videos': Video.objects.none(),
-        'is_sub': False,
+        'channel': user,
+        'videos': Video.objects.filter(author__username=username).order_by('-created_at'),
+        'is_sub': Subscription.objects.filter(subscriber_id=request.user.id, channel_id=user.id).exists(),
     })
-
-
-def subscribe(request, pk):
-    return redirect(request.META.get('HTTP_REFERER') or 'index')

@@ -15,7 +15,7 @@
                 {% endif %}
                 <div class="card-info">
                     <div class="card-title">{{ video.title }}</div>
-                    <div class="meta">{{ video.author.username }} · {{ video.views.count }} просм.</div>
+                    <div class="meta">{{ video.author.first_name }} · {{ video.views.count }} просм. <br>{{ video.created_at|date:"d.m.Y H:i" }}</div>
                 </div>
             </a>
         {% empty %}

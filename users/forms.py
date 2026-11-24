@@ -6,11 +6,10 @@ from .models import User
 class EditProfileForm(forms.ModelForm):
     class Meta:
         model = User
-        fields = ('username', 'email', 'avatar')
+        fields = ('username', 'first_name', 'avatar')
         labels = {
             'username': 'Логин',
             'first_name': 'Отображаемое имя',
-            'email': 'Почта',
             'avatar': 'Аватарка',
         }
 
@@ -22,7 +21,6 @@ class RegisterForm(UserCreationForm):
         labels = {
             'username': 'Логин',
             'first_name': 'Отображаемое имя',
-            'email': 'Почта',
             'avatar': 'Аватарка',
         }
 

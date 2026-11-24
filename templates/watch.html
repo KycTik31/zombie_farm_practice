@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% block title %}{{ video.title }} - Зомби Ферма{% endblock %}
+{% load static %}
 
 {% block content %}
 <div class="watch">
@@ -22,11 +23,11 @@
         <div class="actions">
             <div style="display: flex; align-items: center; gap: 10px;">
                 <a href="{% url 'channel' video.author.username %}" class="ava">
-                    {% if video.author.avatar %}<img src="{{ video.author.avatar_url }}">{% else %}{{ video.author.username|slice:":1"|upper }}{% endif %}
+                    {% if video.author.avatar %}<img src="{{ video.author.avatar_url }}">{% else %}<img src="{% static 'img/default_avatar.png' %}">{% endif %}
                 </a>
                 <div>
                     <a href="{% url 'channel' video.author.username %}" style="font-weight: bold; display: block;">
-                        {{ video.author.username }}
+                        {{ video.author.first_name }}
                     </a>
                     <span class="meta">{{ video.views.count }} просм. · {{ video.created_at|date:"d.m.Y" }}</span>
                 </div>
@@ -71,8 +72,11 @@
 
         {% for c in comments %}
             <div class="comment">
-                <div class="meta" style="margin-bottom: 4px;">
-                    <b>{{ c.author.username }}</b> · {{ c.created_at|date:"d.m.Y H:i" }}
+                <div class="meta" style="margin-bottom: 4px; display: flex; align-items: center">
+                    <img src="{{ c.author.avatar_url }}" class="ava" style="margin-right: 10px">
+                    <a href="{% url 'channel' c.author.username %}" style="{% if c.author.username == video.author.username %} background-color: white; color: black; border-radius: 20px; border: white solid 5px;{% else %}color: white;{% endif %}">{{ c.author.first_name }}</a>
+                    ·
+                    {{ c.created_at|date:"d.m.Y H:i" }}
                 </div>
                 <div>{{ c.text }}</div>
             </div>
@@ -92,7 +96,7 @@
                 {% endif %}
                 <div>
                     <div class="card-title" style="font-size: 14px;">{{ v.title }}</div>
-                    <div class="meta">{{ v.author.username }}</div>
+                    <div class="meta">{{ v.author.first_name }}</div>
                     <div class="meta">{{ v.views.count }} просм.</div>
                 </div>
             </a>

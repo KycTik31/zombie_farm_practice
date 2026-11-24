@@ -87,6 +87,10 @@ img {
     color: #fff;
 }
 
+textarea {
+    resize: vertical;
+}
+
 .input,
 .form-row input,
 .form-row select,

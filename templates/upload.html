@@ -49,6 +49,14 @@
 
     function showVideoInfo(file) {
         if (!file) return;
+         const ext = file.name.slice(file.name.lastIndexOf('.')).toLowerCase();
+        if (ext !== '.mp4' && ext !== '.webm') {
+            videoTitle.textContent = 'Только .mp4 или .webm!';
+            videoMeta.textContent = 'Файл ' + file.name + ' не подходит';
+            videoDrop.classList.remove('active');
+            videoInput.value = '';
+            return;
+        }
         const mb = (file.size / (1024 * 1024)).toFixed(1);
         videoTitle.textContent = file.name;
         videoMeta.textContent = mb + ' МБ · готово к загрузке';

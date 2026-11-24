@@ -1,13 +1,23 @@
+import uuid
+
 from django.db import models
 from django.conf import settings
+
+
+def video_upload_path(instance, filename):
+    return f'videos/{uuid.uuid4().hex}.{filename.split(".")[-1]}'
+
+
+def thumb_upload_path(instance, filename):
+    return f'thumbnails/{uuid.uuid4().hex}.{filename.split(".")[-1]}'
 
 
 class Video(models.Model):
     author = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='videos')
     title = models.CharField(max_length=200)
     description = models.TextField(blank=True)
-    file = models.FileField(upload_to='videos/')
-    thumbnail = models.ImageField(upload_to='thumbnails/', blank=True, null=True)
+    file = models.FileField(upload_to=video_upload_path)
+    thumbnail = models.ImageField(upload_to=thumb_upload_path, blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):

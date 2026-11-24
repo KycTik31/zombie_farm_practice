@@ -12,3 +12,7 @@ class UploadVideoForm(forms.ModelForm):
             'file': 'Файл',
             'thumbnail': 'Обложка',
         }
+        widgets = {
+            'file': forms.FileInput(attrs={'accept': '.mp4,.webm,video/mp4,video/webm'}),
+            'thumbnail': forms.FileInput(attrs={'accept': 'image/*'}),
+        }

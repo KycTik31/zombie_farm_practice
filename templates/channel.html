@@ -1,11 +1,12 @@
 {% extends 'base.html' %}
 {% block title %}{{ channel.first_name }} - Зомби Ферма{% endblock %}
+{% load static %}
 
 {% block content %}
 <div class="channel-top">
     <div style="display: flex; align-items: center; gap: 16px;">
         <div class="ava ava-big">
-            {% if channel.avatar %}<img src="{{ channel.avatar_url }}">{% else %}{{ channel.username|slice:":1"|upper }}{% endif %}
+            {% if channel.avatar %}<img src="{{ channel.avatar_url }}">{% else %}<img src="{% static 'img/default_avatar.png' %}">{% endif %}
         </div>
         <div>
             <h1>{{ channel.first_name }}</h1>
