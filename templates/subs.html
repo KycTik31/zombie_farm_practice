@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load static %}
 {% block title %}Подписки - Зомби Ферма{% endblock %}
 
 {% block content %}
@@ -8,7 +9,7 @@
         {% for ch in channels %}
             <a href="{% url 'channel' ch.username %}" class="sub-item">
                 <div class="ava">
-                    {% if ch.avatar %}<img src="{{ ch.avatar_url }}">{% else %}{{ ch.username|slice:":1"|upper }}{% endif %}
+                    {% if ch.avatar %}<img src="{{ ch.avatar_url }}">{% else %}<img src="{% static 'img/default_avatar.png' %}">{% endif %}
                 </div>
                 <span>{{ ch.username }}</span>
             </a>

@@ -34,17 +34,17 @@
             </div>
 
             <div style="display: flex; gap: 8px;">
-                <form action="{% url 'like' video.pk %}" method="post">
+                <form id="likeForm" action="{% url 'like' video.pk %}" method="post">
                     {% csrf_token %}
-                    <button type="submit" class="btn {% if is_liked %}btn-green{% endif %}">
+                    <button id="likeBtn" type="submit" class="btn {% if is_liked %}btn-green{% endif %}">
                         ♥ {{ video.likes.count }}
                     </button>
                 </form>
 
                 {% if user != video.author %}
-                    <form action="{% url 'subscribe' video.author.pk %}" method="post">
+                    <form id="subForm" action="{% url 'subscribe' video.author.pk %}" method="post">
                         {% csrf_token %}
-                        <button type="submit" class="btn {% if not is_sub %}btn-green{% endif %}">
+                        <button id="subBtn" type="submit" class="btn {% if not is_sub %}btn-green{% endif %}">
                             {% if is_sub %}Вы подписаны{% else %}Подписаться{% endif %}
                         </button>
                     </form>
@@ -61,28 +61,30 @@
             <div class="desc">{{ video.description }}</div>
         {% endif %}
 
-        <h3>Комментарии ({{ comments.count }})</h3>
+        <h3>Комментарии (<span id="commentsCount">{{ comments.count }}</span>)</h3>
         {% if user.is_authenticated %}
-            <form action="{% url 'comment' video.pk %}" method="post" class="comment-form" style="margin: 10px 0 18px;">
+            <form id="commentForm" action="{% url 'comment' video.pk %}" method="post" class="comment-form" style="margin: 10px 0 18px;">
                 {% csrf_token %}
                 <textarea name="text" rows="2" placeholder="Оставить комментарий..." required></textarea>
                 <button type="submit" class="btn btn-green" style="margin-top: 8px;">Отправить</button>
             </form>
         {% endif %}
 
-        {% for c in comments %}
-            <div class="comment">
-                <div class="meta" style="margin-bottom: 4px; display: flex; align-items: center">
-                    <img src="{{ c.author.avatar_url }}" class="ava" style="margin-right: 10px">
-                    <a href="{% url 'channel' c.author.username %}" style="{% if c.author.username == video.author.username %} background-color: white; color: black; border-radius: 20px; border: white solid 5px;{% else %}color: white;{% endif %}">{{ c.author.first_name }}</a>
-                    ·
-                    {{ c.created_at|date:"d.m.Y H:i" }}
+        <div id="commentsList">
+            {% for c in comments %}
+                <div class="comment">
+                    <div class="meta" style="margin-bottom: 4px; display: flex; align-items: center">
+                        <img src="{{ c.author.avatar_url }}" class="ava" style="margin-right: 10px">
+                        <a href="{% url 'channel' c.author.username %}" style="{% if c.author.username == video.author.username %} background-color: white; color: black; border-radius: 20px; border: white solid 5px;{% else %}color: white;{% endif %}">{{ c.author.first_name }}</a>
+                        ·
+                        {{ c.created_at|date:"d.m.Y H:i" }}
+                    </div>
+                    <div>{{ c.text }}</div>
                 </div>
-                <div>{{ c.text }}</div>
-            </div>
-        {% empty %}
-            <p class="meta" style="margin-top: 8px;">Комментариев пока нет.</p>
-        {% endfor %}
+            {% empty %}
+                <p id="noComments" class="meta" style="margin-top: 8px;">Комментариев пока нет.</p>
+            {% endfor %}
+        </div>
     </div>
 
     <aside>
@@ -113,6 +115,8 @@
     const muteBtn = document.getElementById('muteBtn');
     const vol = document.getElementById('vol');
     const fullBtn = document.getElementById('fullBtn');
+    const savedVol = localStorage.getItem('player_vol');
+    const savedMuted = localStorage.getItem('player_muted') === 'true';
 
     function fmt(sec) {
         if (!sec || isNaN(sec)) return '0:00';
@@ -149,12 +153,113 @@
 
     vol.oninput = () => {
         video.volume = vol.value;
-        video.muted = vol.value === 0;
+        video.muted = Number(vol.value) === 0;
         muteBtn.textContent = video.muted ? '🔇' : '🔊';
     };
 
     fullBtn.onclick = () => {
         document.fullscreenElement ? document.exitFullscreen() : box.requestFullscreen();
     };
+
+    if (savedVol !== null) {
+        video.volume = Number(savedVol);
+        vol.value = savedVol;
+    }
+
+    video.muted = savedMuted;
+    muteBtn.textContent = (video.muted || video.volume === 0) ? '🔇' : '🔊';
+
+    muteBtn.onclick = () => {
+        video.muted = !video.muted;
+        localStorage.setItem('player_muted', video.muted);
+        muteBtn.textContent = (video.muted || video.volume === 0) ? '🔇' : '🔊';
+    };
+
+    vol.oninput = () => {
+        video.volume = vol.value;
+        video.muted = Number(vol.value) === 0;
+        localStorage.setItem('player_vol', video.volume);
+        localStorage.setItem('player_muted', video.muted);
+        muteBtn.textContent = video.muted ? '🔇' : '🔊';
+    };
+
+    async function postForm(form) {
+        const res = await fetch(form.action, {
+            method: 'POST',
+            body: new FormData(form),
+            headers: { 'X-Requested-With': 'XMLHttpRequest' },
+        });
+        if (res.redirected) {
+            window.location.href = res.url;
+            return null;
+        }
+        return res.ok ? await res.json() : null;
+    }
+    const likeForm = document.getElementById('likeForm');
+    if (likeForm) {
+        likeForm.onsubmit = async (e) => {
+            e.preventDefault();
+            const data = await postForm(likeForm);
+            if (!data) return;
+            const btn = document.getElementById('likeBtn');
+            btn.textContent = '♥ ' + data.count;
+            btn.classList.toggle('btn-green', data.liked);
+        };
+    }
+
+    const subForm = document.getElementById('subForm');
+    if (subForm) {
+        subForm.onsubmit = async (e) => {
+            e.preventDefault();
+            const data = await postForm(subForm);
+            if (!data) return;
+            const btn = document.getElementById('subBtn');
+            btn.textContent = data.is_sub ? 'Вы подписаны' : 'Подписаться';
+            btn.classList.toggle('btn-green', !data.is_sub);
+        };
+    }
+
+    const commentForm = document.getElementById('commentForm');
+    if (commentForm) {
+        commentForm.onsubmit = async (e) => {
+            e.preventDefault();
+            const data = await postForm(commentForm);
+            if (!data) return;
+
+            const noComments = document.getElementById('noComments');
+            if (noComments) noComments.remove();
+
+            const item = document.createElement('div');
+            item.className = 'comment';
+
+            const meta = document.createElement('div');
+            meta.className = 'meta';
+            meta.style.cssText = 'margin-bottom: 4px; display: flex; align-items: center;';
+
+            const img = document.createElement('img');
+            img.src = data.avatar_url;
+            img.className = 'ava';
+            img.style.marginRight = '10px';
+
+            const link = document.createElement('a');
+            link.href = data.channel_url;
+            link.textContent = data.author;
+            if (data.is_author) {
+                link.style.cssText = 'background-color: white; color: black; border-radius: 20px; border: white solid 5px;';
+            } else {
+                link.style.color = 'white';
+            }
+
+            const body = document.createElement('div');
+            body.textContent = data.text;
+
+            meta.append(img, link, ' · ' + data.created_at);
+            item.append(meta, body);
+
+            document.getElementById('commentsList').prepend(item);
+            document.getElementById('commentsCount').textContent = data.count;
+            commentForm.reset();
+        };
+    }
 </script>
 {% endblock %}

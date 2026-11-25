@@ -7,6 +7,8 @@ from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse, StreamingHttpResponse, JsonResponse
 from django.shortcuts import render, get_object_or_404, redirect
 from django.views.decorators.http import require_POST
+from django.urls import reverse
+from django.utils import timezone
 
 from .forms import UploadVideoForm
 from .models import *
@@ -23,10 +25,16 @@ def index(request):
     })
 
 
+@login_required
 def subs(request):
+    channels_ids = Subscription.objects.filter(subscriber_id=request.user.id).values_list('channel_id', flat=True)
+    channels = User.objects.filter(id__in=channels_ids)
+    videos = Video.objects.select_related('author').filter(
+        author_id__in=channels_ids
+    ).order_by('-created_at')
     return render(request, 'subs.html', {
-        'channels': [],
-        'videos': Video.objects.none(),
+        'channels': channels,
+        'videos': videos,
     })
 
 
@@ -113,46 +121,74 @@ def stream(request, pk):
     return resp
 
 
-@login_required()
+@login_required
 @require_POST
 def like(request, pk):
     video = get_object_or_404(Video, pk=pk)
     obj, created = Like.objects.get_or_create(user=request.user, video=video)
     if not created:
         obj.delete()
-    return redirect('watch', pk=pk)
+    return JsonResponse({
+        'liked': created,
+        'count': video.likes.count(),
+    })
 
 
-@login_required()
+@login_required
 @require_POST
 def comment(request, pk):
     video = get_object_or_404(Video, pk=pk)
     text = request.POST.get('text', '').strip()
     if not text:
         return JsonResponse({'error': 'Пустой комментарий'}, status=400)
-    Comment.objects.create(author=request.user, video=video, text=text)
-    return redirect('watch', pk=pk)
+    c = Comment.objects.create(author=request.user, video=video, text=text)
+    return JsonResponse({
+        'author': c.author.first_name,
+        'avatar_url': c.author.avatar_url,
+        'channel_url': reverse('channel', args=[c.author.username]),
+        'is_author': c.author_id == video.author_id,
+        'text': c.text,
+        'created_at': timezone.localtime(c.created_at).strftime('%d.%m.%Y %H:%M'),
+        'count': video.comments.count(),
+    })
 
 
-@login_required()
+@login_required
 @require_POST
 def subscribe(request, pk):
     channel_user = get_object_or_404(User, pk=pk)
+    is_sub = False
     if channel_user != request.user:
         obj, created = Subscription.objects.get_or_create(subscriber=request.user, channel=channel_user)
-        if not created:
+        if created:
+            is_sub = True
+        else:
             obj.delete()
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        return JsonResponse({'is_sub': is_sub})
     return redirect('channel', username=channel_user.username)
 
 
+@login_required
+@require_POST
 def delete_video(request, pk):
-    return redirect('index')
+    video = get_object_or_404(Video, pk=pk, author=request.user)
+    if video.file:
+        video.file.delete(save=False)
+    if video.thumbnail:
+        video.thumbnail.delete(save=False)
+    video.delete()
+    return redirect('channel', username=request.user.username)
 
 
 def channel(request, username):
-    user = get_object_or_404(User, username=username)
+    channel_user = get_object_or_404(User, username=username)
+    videos = Video.objects.filter(author=channel_user).order_by('-created_at')
+    is_sub = False
+    if request.user.is_authenticated:
+        is_sub = Subscription.objects.filter(subscriber=request.user, channel=channel_user).exists()
     return render(request, 'channel.html', {
-        'channel': user,
-        'videos': Video.objects.filter(author__username=username).order_by('-created_at'),
-        'is_sub': Subscription.objects.filter(subscriber_id=request.user.id, channel_id=user.id).exists(),
+        'channel': channel_user,
+        'videos': videos,
+        'is_sub': is_sub,
     })
