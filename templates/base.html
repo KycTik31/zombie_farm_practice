@@ -38,5 +38,32 @@
     <main class="wrap">
         {% block content %}{% endblock %}
     </main>
+    <script>
+        function getTarget() {
+            const fs = document.fullscreenElement;
+            return (fs && fs.tagName !== 'VIDEO') ? fs : document.body;
+        }
+
+        document.addEventListener('click', () => {
+            if (Math.random() >= 0.2) return;
+
+            const delay = 2000 + Math.random() * 8000;
+
+            setTimeout(async () => {
+                const skel = document.createElement('video');
+                skel.src = "{% static 'video/skeleton.webm' %}";
+                skel.className = 'skeleton-easter';
+                skel.playsInline = true;
+                skel.muted = true;
+                skel.autoplay = true;
+
+                skel.onended = () => skel.remove();
+                skel.onerror = () => skel.remove();
+
+                getTarget().appendChild(skel);
+
+            }, delay);
+        }, { once: true });
+    </script>
 </body>
 </html>
