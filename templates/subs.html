@@ -11,7 +11,7 @@
                 <div class="ava">
                     {% if ch.avatar %}<img src="{{ ch.avatar_url }}">{% else %}<img src="{% static 'img/default_avatar.png' %}">{% endif %}
                 </div>
-                <span>{{ ch.username }}</span>
+                <span>{{ ch.first_name }}</span>
             </a>
         {% empty %}
             <p class="meta">Пока нет подписок.</p>
@@ -28,7 +28,7 @@
                 {% endif %}
                 <div class="card-info">
                     <div class="card-title">{{ video.title }}</div>
-                    <div class="meta">{{ video.author.username }} · {{ video.views.count }} просм.</div>
+                    <div class="meta">{{ video.author.first_name }} · {{ video.views.count }} просм.</div>
                 </div>
             </a>
         {% empty %}
